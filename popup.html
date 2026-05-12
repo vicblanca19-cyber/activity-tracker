@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { width: 300px; font-family: Inter, sans-serif; background: #1a1a2e; color: white; padding: 16px; }
+    h2 { font-size: 15px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+    .tool { display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
+    .tool-name { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+    .tool-time { font-weight: 700; font-size: 14px; }
+    .slack   { background: #4A154B44; }
+    .gcal    { background: #1a73e844; }
+    .sheets  { background: #0f9d5844; }
+    .databricks { background: #FF362144; }
+    .footer { margin-top: 14px; font-size: 11px; color: #888; text-align: center; }
+    .active-badge { background: #ff4444; border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h2>⚡ Activity Tracker <span id="active-badge"></span></h2>
+  <div id="tools"></div>
+  <div class="footer" id="footer">Hoje</div>
+  <script src="popup.js"></script>
+</body>
+</html>
