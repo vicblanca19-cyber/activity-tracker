@@ -5,545 +5,135 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cotação de Seguros</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
-    --bg: #0a0f1e;
-    --surface: #111827;
-    --surface2: #1a2235;
-    --border: #1e2d45;
-    --border-active: #3b6cf6;
-    --gold: #d4a843;
-    --gold-light: #f0c96e;
-    --blue: #3b6cf6;
-    --blue-light: #6b93ff;
-    --text: #e8eaf0;
-    --text-muted: #7a8499;
-    --text-dim: #4a5568;
-    --success: #22c55e;
-    --error: #ef4444;
-    --radius: 12px;
-    --radius-sm: 8px;
+    --bg: #0a0f1e; --surface: #111827; --surface2: #1a2235;
+    --border: #1e2d45; --gold: #d4a843; --gold-light: #f0c96e;
+    --blue: #3b6cf6; --blue-light: #6b93ff; --text: #e8eaf0;
+    --text-muted: #7a8499; --text-dim: #4a5568;
+    --success: #22c55e; --error: #ef4444;
+    --radius: 12px; --radius-sm: 8px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 0 60px;
-    position: relative;
-    overflow-x: hidden;
-  }
-
-  /* Background decorativo */
-  body::before {
-    content: '';
-    position: fixed;
-    top: -200px; left: -200px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(59,108,246,0.12) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  body::after {
-    content: '';
-    position: fixed;
-    bottom: -200px; right: -200px;
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(212,168,67,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  /* HEADER */
-  .header {
-    width: 100%;
-    background: linear-gradient(135deg, #0d1526 0%, #111e36 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 28px 24px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .header::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--blue), var(--gold), var(--blue));
-  }
-  .header-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(212,168,67,0.1);
-    border: 1px solid rgba(212,168,67,0.3);
-    border-radius: 50px;
-    padding: 4px 14px;
-    font-size: 11px;
-    color: var(--gold-light);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-  .header h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(22px, 5vw, 36px);
-    font-weight: 700;
-    background: linear-gradient(135deg, #fff 0%, var(--gold-light) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.2;
-    margin-bottom: 8px;
-  }
-  .header p {
-    color: var(--text-muted);
-    font-size: 14px;
-    max-width: 400px;
-    margin: 0 auto;
-  }
-
-  /* PROGRESS */
-  .progress-wrap {
-    width: 100%;
-    max-width: 620px;
-    padding: 24px 24px 0;
-  }
-  .progress-steps {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    margin-bottom: 8px;
-  }
-  .prog-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    position: relative;
-  }
-  .prog-dot {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    background: var(--surface);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 600;
-    color: var(--text-dim);
-    transition: all 0.4s ease;
-    position: relative; z-index: 1;
-  }
-  .prog-dot.active {
-    border-color: var(--blue);
-    background: var(--blue);
-    color: #fff;
-    box-shadow: 0 0 20px rgba(59,108,246,0.4);
-  }
-  .prog-dot.done {
-    border-color: var(--gold);
-    background: var(--gold);
-    color: #000;
-  }
-  .prog-label {
-    font-size: 10px;
-    color: var(--text-dim);
-    margin-top: 6px;
-    text-align: center;
-    transition: color 0.3s;
-    white-space: nowrap;
-  }
-  .prog-step.active .prog-label { color: var(--blue-light); }
-  .prog-step.done .prog-label { color: var(--gold); }
-  .prog-line {
-    flex: 1;
-    height: 2px;
-    background: var(--border);
-    margin-bottom: 24px;
-    position: relative;
-    top: -12px;
-    transition: background 0.4s;
-  }
-  .prog-line.done { background: var(--gold); }
-
-  /* CARD */
-  .card {
-    width: 100%;
-    max-width: 620px;
-    margin: 20px 24px 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    position: relative;
-    animation: fadeSlide 0.4s ease;
-  }
-  @keyframes fadeSlide {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .card-icon {
-    font-size: 36px;
-    margin-bottom: 16px;
-    display: block;
-  }
-  .card h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    color: #fff;
-    margin-bottom: 6px;
-  }
-  .card .subtitle {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 28px;
-    line-height: 1.6;
-  }
-
-  /* FIELDS */
-  .field-group {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
-  .field-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  @media (max-width: 500px) { .field-row { grid-template-columns: 1fr; } }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-  }
-  .field label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-muted);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-  .field label .req { color: var(--gold); margin-left: 2px; }
-  .field label .opt { color: var(--text-dim); font-weight: 400; font-size: 11px; text-transform: none; letter-spacing: 0; }
-
-  .field input,
-  .field select,
-  .field textarea {
-    background: var(--surface2);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    padding: 12px 14px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    width: 100%;
-  }
-  .field input::placeholder,
-  .field textarea::placeholder { color: var(--text-dim); }
-  .field input:focus,
-  .field select:focus,
-  .field textarea:focus {
-    border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(59,108,246,0.12);
-  }
-  .field select option { background: #1a2235; }
-  .field textarea { resize: vertical; min-height: 80px; }
-
-  .field input.error,
-  .field select.error { border-color: var(--error); }
-  .field-error { font-size: 11px; color: var(--error); margin-top: -4px; }
-
-  /* FILE UPLOAD */
-  .file-upload {
-    border: 2px dashed var(--border);
-    border-radius: var(--radius-sm);
-    padding: 24px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    background: var(--surface2);
-  }
-  .file-upload:hover { border-color: var(--blue); background: rgba(59,108,246,0.04); }
-  .file-upload.has-file { border-color: var(--success); background: rgba(34,197,94,0.04); }
-  .file-upload input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .file-upload-icon { font-size: 28px; margin-bottom: 8px; }
-  .file-upload-text { font-size: 13px; color: var(--text-muted); }
-  .file-upload-text strong { color: var(--blue-light); }
-  .file-name { font-size: 12px; color: var(--success); margin-top: 6px; font-weight: 500; }
-
-  /* SEGURO OPTIONS */
-  .seguro-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  @media (max-width: 400px) { .seguro-grid { grid-template-columns: 1fr; } }
-  .seguro-option {
-    border: 2px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--surface2);
-  }
-  .seguro-option:hover { border-color: var(--blue); transform: translateY(-2px); }
-  .seguro-option.selected {
-    border-color: var(--gold);
-    background: rgba(212,168,67,0.06);
-    box-shadow: 0 0 0 1px rgba(212,168,67,0.2);
-  }
-  .seg-icon { font-size: 28px; }
-  .seg-info h3 { font-size: 14px; font-weight: 600; color: #fff; }
-  .seg-info p { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-  .seg-check {
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    margin-left: auto;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-  .seguro-option.selected .seg-check {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #000;
-  }
-
-  /* YES/NO TOGGLE */
-  .yn-group {
-    display: flex;
-    gap: 12px;
-  }
-  .yn-btn {
-    flex: 1;
-    border: 2px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 14px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    background: var(--surface2);
-    color: var(--text-muted);
-    transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .yn-btn:hover { border-color: var(--blue); color: var(--text); }
-  .yn-btn.selected-yes { border-color: var(--success); background: rgba(34,197,94,0.08); color: var(--success); }
-  .yn-btn.selected-no { border-color: var(--error); background: rgba(239,68,68,0.06); color: #fca5a5; }
-
-  /* CHECKBOX GRID */
-  .check-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .check-pill {
-    border: 1.5px solid var(--border);
-    border-radius: 50px;
-    padding: 7px 14px;
-    font-size: 12px;
-    cursor: pointer;
-    color: var(--text-muted);
-    transition: all 0.15s;
-    user-select: none;
-    background: var(--surface2);
-  }
-  .check-pill:hover { border-color: var(--blue); color: var(--text); }
-  .check-pill.checked { border-color: var(--blue); background: rgba(59,108,246,0.15); color: var(--blue-light); }
-
-  /* SECTION DIVIDER */
-  .section-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 8px 0 20px;
-  }
-  .section-divider hr { flex: 1; border: none; border-top: 1px solid var(--border); }
-  .section-divider span {
-    font-size: 11px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    white-space: nowrap;
-  }
-
-  /* INFO BOX */
-  .info-box {
-    background: rgba(59,108,246,0.08);
-    border: 1px solid rgba(59,108,246,0.2);
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
-    font-size: 13px;
-    color: var(--blue-light);
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  /* BUTTONS */
-  .btn-row {
-    display: flex;
-    gap: 12px;
-    margin-top: 28px;
-  }
-  .btn {
-    padding: 14px 28px;
-    border-radius: var(--radius-sm);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-  }
-  .btn-back {
-    background: transparent;
-    border: 1.5px solid var(--border);
-    color: var(--text-muted);
-    flex: 0 0 auto;
-    padding: 14px 20px;
-  }
-  .btn-back:hover { border-color: var(--text-muted); color: var(--text); }
-  .btn-next {
-    flex: 1;
-    background: linear-gradient(135deg, var(--blue) 0%, #2553d4 100%);
-    color: #fff;
-    box-shadow: 0 4px 24px rgba(59,108,246,0.3);
-  }
-  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(59,108,246,0.4); }
-  .btn-next:active { transform: translateY(0); }
-  .btn-submit {
-    flex: 1;
-    background: linear-gradient(135deg, var(--gold) 0%, #b8882a 100%);
-    color: #000;
-    box-shadow: 0 4px 24px rgba(212,168,67,0.3);
-    font-weight: 700;
-  }
-  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(212,168,67,0.4); }
-
-  /* SUCCESS */
-  .success-card {
-    text-align: center;
-    padding: 48px 32px;
-  }
-  .success-icon {
-    width: 80px; height: 80px;
-    border-radius: 50%;
-    background: rgba(34,197,94,0.1);
-    border: 2px solid var(--success);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 36px;
-    margin: 0 auto 24px;
-    animation: pop 0.5s ease;
-  }
-  @keyframes pop {
-    0% { transform: scale(0); opacity: 0; }
-    70% { transform: scale(1.15); }
-    100% { transform: scale(1); opacity: 1; }
-  }
-  .success-card h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 26px;
-    color: #fff;
-    margin-bottom: 12px;
-  }
-  .success-card p { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
-  .success-card .whatsapp-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 24px;
-    background: #25d366;
-    color: #fff;
-    padding: 14px 28px;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    font-size: 15px;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-  .success-card .whatsapp-btn:hover { background: #1ebe5d; transform: translateY(-2px); }
-
-  /* FOOTER */
-  .footer {
-    margin-top: 32px;
-    text-align: center;
-    font-size: 12px;
-    color: var(--text-dim);
-  }
-  .footer span { color: var(--gold); }
-
-  /* HIDDEN */
-  .hidden { display: none !important; }
-
-  /* Apolice section */
-  .apolice-section {
-    background: rgba(212,168,67,0.05);
-    border: 1px solid rgba(212,168,67,0.2);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 4px;
-  }
-  .apolice-header {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--gold-light);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 0 60px; overflow-x: hidden; }
+  body::before { content:''; position:fixed; top:-200px; left:-200px; width:600px; height:600px; background:radial-gradient(circle,rgba(59,108,246,.12) 0%,transparent 70%); pointer-events:none; }
+  body::after { content:''; position:fixed; bottom:-200px; right:-200px; width:500px; height:500px; background:radial-gradient(circle,rgba(212,168,67,.08) 0%,transparent 70%); pointer-events:none; }
+  .header { width:100%; background:linear-gradient(135deg,#0d1526,#111e36); border-bottom:1px solid var(--border); padding:28px 24px; text-align:center; position:relative; overflow:hidden; }
+  .header::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--blue),var(--gold),var(--blue)); }
+  .header-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(212,168,67,.1); border:1px solid rgba(212,168,67,.3); border-radius:50px; padding:4px 14px; font-size:11px; color:var(--gold-light); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:12px; }
+  .header h1 { font-family:'Playfair Display',serif; font-size:clamp(22px,5vw,36px); font-weight:700; background:linear-gradient(135deg,#fff,var(--gold-light)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1.2; margin-bottom:8px; }
+  .header p { color:var(--text-muted); font-size:14px; max-width:400px; margin:0 auto; }
+  .progress-wrap { width:100%; max-width:620px; padding:24px 24px 0; }
+  .progress-steps { display:flex; align-items:center; }
+  .prog-step { display:flex; flex-direction:column; align-items:center; flex:1; }
+  .prog-dot { width:32px; height:32px; border-radius:50%; border:2px solid var(--border); background:var(--surface); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:var(--text-dim); transition:all .4s; position:relative; z-index:1; }
+  .prog-dot.active { border-color:var(--blue); background:var(--blue); color:#fff; box-shadow:0 0 20px rgba(59,108,246,.4); }
+  .prog-dot.done { border-color:var(--gold); background:var(--gold); color:#000; }
+  .prog-label { font-size:10px; color:var(--text-dim); margin-top:6px; text-align:center; white-space:nowrap; }
+  .prog-step.active .prog-label { color:var(--blue-light); }
+  .prog-step.done .prog-label { color:var(--gold); }
+  .prog-line { flex:1; height:2px; background:var(--border); margin-bottom:24px; position:relative; top:-12px; transition:background .4s; }
+  .prog-line.done { background:var(--gold); }
+  .card { width:100%; max-width:620px; margin:20px 24px 0; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:32px; animation:fadeSlide .4s ease; }
+  @keyframes fadeSlide { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .card-icon { font-size:36px; margin-bottom:16px; display:block; }
+  .card h2 { font-family:'Playfair Display',serif; font-size:22px; color:#fff; margin-bottom:6px; }
+  .card .subtitle { font-size:13px; color:var(--text-muted); margin-bottom:28px; line-height:1.6; }
+  .field-group { display:flex; flex-direction:column; gap:18px; }
+  .field-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:500px){.field-row{grid-template-columns:1fr}}
+  .field { display:flex; flex-direction:column; gap:7px; }
+  .field label { font-size:12px; font-weight:600; color:var(--text-muted); letter-spacing:.5px; text-transform:uppercase; }
+  .field label .req { color:var(--gold); margin-left:2px; }
+  .field label .opt { color:var(--text-dim); font-weight:400; font-size:11px; text-transform:none; letter-spacing:0; }
+  .field input,.field select,.field textarea { background:var(--surface2); border:1.5px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; padding:12px 14px; outline:none; transition:border-color .2s,box-shadow .2s; width:100%; }
+  .field input::placeholder,.field textarea::placeholder { color:var(--text-dim); }
+  .field input:focus,.field select:focus,.field textarea:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(59,108,246,.12); }
+  .field select option { background:#1a2235; }
+  .field textarea { resize:vertical; min-height:80px; }
+  .field input.error,.field select.error { border-color:var(--error); }
+  .field-error { font-size:11px; color:var(--error); margin-top:-4px; }
+  .file-upload { border:2px dashed var(--border); border-radius:var(--radius-sm); padding:24px; text-align:center; cursor:pointer; transition:all .2s; position:relative; background:var(--surface2); }
+  .file-upload:hover { border-color:var(--blue); }
+  .file-upload.has-file { border-color:var(--success); background:rgba(34,197,94,.04); }
+  .file-upload input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .file-upload-icon { font-size:28px; margin-bottom:8px; }
+  .file-upload-text { font-size:13px; color:var(--text-muted); }
+  .file-upload-text strong { color:var(--blue-light); }
+  .file-name { font-size:12px; color:var(--success); margin-top:6px; font-weight:500; }
+  .seguro-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media(max-width:400px){.seguro-grid{grid-template-columns:1fr}}
+  .seguro-option { border:2px solid var(--border); border-radius:var(--radius); padding:18px 16px; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:12px; background:var(--surface2); }
+  .seguro-option:hover { border-color:var(--blue); transform:translateY(-2px); }
+  .seguro-option.selected { border-color:var(--gold); background:rgba(212,168,67,.06); box-shadow:0 0 0 1px rgba(212,168,67,.2); }
+  .seg-icon { font-size:28px; }
+  .seg-info h3 { font-size:14px; font-weight:600; color:#fff; }
+  .seg-info p { font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .seg-check { width:18px; height:18px; border-radius:50%; border:2px solid var(--border); margin-left:auto; display:flex; align-items:center; justify-content:center; font-size:10px; transition:all .2s; flex-shrink:0; }
+  .seguro-option.selected .seg-check { background:var(--gold); border-color:var(--gold); color:#000; }
+  .yn-group { display:flex; gap:12px; }
+  .yn-btn { flex:1; border:2px solid var(--border); border-radius:var(--radius-sm); padding:14px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; background:var(--surface2); color:var(--text-muted); transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .yn-btn:hover { border-color:var(--blue); color:var(--text); }
+  .yn-btn.selected-yes { border-color:var(--success); background:rgba(34,197,94,.08); color:var(--success); }
+  .yn-btn.selected-no { border-color:var(--error); background:rgba(239,68,68,.06); color:#fca5a5; }
+  .check-grid { display:flex; flex-wrap:wrap; gap:8px; }
+  .check-pill { border:1.5px solid var(--border); border-radius:50px; padding:7px 14px; font-size:12px; cursor:pointer; color:var(--text-muted); transition:all .15s; user-select:none; background:var(--surface2); }
+  .check-pill:hover { border-color:var(--blue); color:var(--text); }
+  .check-pill.checked { border-color:var(--blue); background:rgba(59,108,246,.15); color:var(--blue-light); }
+  .section-divider { display:flex; align-items:center; gap:12px; margin:8px 0 20px; }
+  .section-divider hr { flex:1; border:none; border-top:1px solid var(--border); }
+  .section-divider span { font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; white-space:nowrap; }
+  .btn-row { display:flex; gap:12px; margin-top:28px; }
+  .btn { padding:14px 28px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; border:none; transition:all .2s; }
+  .btn-back { background:transparent; border:1.5px solid var(--border); color:var(--text-muted); flex:0 0 auto; padding:14px 20px; }
+  .btn-back:hover { border-color:var(--text-muted); color:var(--text); }
+  .btn-next { flex:1; background:linear-gradient(135deg,var(--blue),#2553d4); color:#fff; box-shadow:0 4px 24px rgba(59,108,246,.3); }
+  .btn-next:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(59,108,246,.4); }
+  .btn-submit { flex:1; background:linear-gradient(135deg,var(--gold),#b8882a); color:#000; box-shadow:0 4px 24px rgba(212,168,67,.3); font-weight:700; }
+  .btn-submit:hover { transform:translateY(-2px); }
+  .apolice-section { background:rgba(212,168,67,.05); border:1px solid rgba(212,168,67,.2); border-radius:var(--radius); padding:20px; }
+  .apolice-header { font-size:13px; font-weight:600; color:var(--gold-light); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .outros-subtipo { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px; }
+  @media(max-width:420px){.outros-subtipo{grid-template-columns:1fr}}
+  .subtipo-pill { border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:11px 14px; cursor:pointer; font-size:13px; font-weight:500; color:var(--text-muted); background:var(--surface2); transition:all .2s; text-align:center; }
+  .subtipo-pill:hover { border-color:var(--blue); color:var(--text); }
+  .subtipo-pill.selected { border-color:var(--gold); background:rgba(212,168,67,.08); color:var(--gold-light); }
+  .success-card { text-align:center; padding:48px 32px; }
+  .success-icon { width:80px; height:80px; border-radius:50%; background:rgba(34,197,94,.1); border:2px solid var(--success); display:flex; align-items:center; justify-content:center; font-size:36px; margin:0 auto 24px; animation:pop .5s ease; }
+  @keyframes pop{0%{transform:scale(0);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+  .success-card h2 { font-family:'Playfair Display',serif; font-size:26px; color:#fff; margin-bottom:12px; }
+  .success-card p { color:var(--text-muted); font-size:14px; line-height:1.7; }
+  .whatsapp-btn { display:inline-flex; align-items:center; gap:10px; margin-top:24px; background:#25d366; color:#fff; padding:14px 28px; border-radius:var(--radius-sm); font-weight:600; font-size:15px; text-decoration:none; transition:all .2s; }
+  .whatsapp-btn:hover { background:#1ebe5d; transform:translateY(-2px); }
+  .footer { margin-top:32px; text-align:center; font-size:12px; color:var(--text-dim); }
+  .footer span { color:var(--gold); }
+  .hidden { display:none !important; }
+  .save-indicator { position:fixed; bottom:20px; right:20px; background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.3); color:#86efac; font-size:12px; padding:8px 16px; border-radius:50px; opacity:0; transition:opacity .4s; pointer-events:none; z-index:999; }
+  .save-indicator.show { opacity:1; }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <div class="header-badge">🛡️ Corretora de Seguros</div>
   <h1>Solicite sua Cotação</h1>
   <p>Preencha em menos de 3 minutos e receba sua proposta personalizada</p>
 </div>
 
-<!-- PROGRESS -->
 <div class="progress-wrap" id="progressWrap">
   <div class="progress-steps">
-    <div class="prog-step active" id="ps1">
-      <div class="prog-dot active" id="pd1">1</div>
-      <div class="prog-label">Identificação</div>
-    </div>
+    <div class="prog-step active" id="ps1"><div class="prog-dot active" id="pd1">1</div><div class="prog-label">Identificação</div></div>
     <div class="prog-line" id="pl1"></div>
-    <div class="prog-step" id="ps2">
-      <div class="prog-dot" id="pd2">2</div>
-      <div class="prog-label">Seguro</div>
-    </div>
+    <div class="prog-step" id="ps2"><div class="prog-dot" id="pd2">2</div><div class="prog-label">Seguro</div></div>
     <div class="prog-line" id="pl2"></div>
-    <div class="prog-step" id="ps3">
-      <div class="prog-dot" id="pd3">3</div>
-      <div class="prog-label">Apólice</div>
-    </div>
+    <div class="prog-step" id="ps3"><div class="prog-dot" id="pd3">3</div><div class="prog-label">Apólice</div></div>
     <div class="prog-line" id="pl3"></div>
-    <div class="prog-step" id="ps4">
-      <div class="prog-dot" id="pd4">4</div>
-      <div class="prog-label">Detalhes</div>
-    </div>
+    <div class="prog-step" id="ps4"><div class="prog-dot" id="pd4">4</div><div class="prog-label">Detalhes</div></div>
   </div>
 </div>
 
-<!-- ======================== STEP 1: IDENTIFICAÇÃO ======================== -->
+<!-- ===== STEP 1 ===== -->
 <div class="card" id="step1">
   <span class="card-icon">👋</span>
   <h2>Vamos começar</h2>
@@ -551,85 +141,84 @@
   <div class="field-group">
     <div class="field">
       <label>Nome completo <span class="req">*</span></label>
-      <input type="text" id="nome" placeholder="Ex: Maria Silva" />
+      <input type="text" id="nome" placeholder="Ex: Maria Silva"/>
       <span class="field-error hidden" id="err-nome">Por favor, informe seu nome.</span>
     </div>
     <div class="field-row">
       <div class="field">
         <label>WhatsApp <span class="req">*</span></label>
-        <input type="tel" id="whatsapp" placeholder="(11) 99999-9999" />
+        <input type="tel" id="whatsapp" placeholder="(11) 99999-9999"/>
         <span class="field-error hidden" id="err-wpp">Informe um número válido.</span>
       </div>
       <div class="field">
         <label>E-mail <span class="req">*</span></label>
-        <input type="email" id="email" placeholder="seu@email.com" />
+        <input type="email" id="email" placeholder="seu@email.com"/>
         <span class="field-error hidden" id="err-email">Informe um e-mail válido.</span>
       </div>
     </div>
   </div>
-  <div class="btn-row">
-    <button class="btn btn-next" onclick="goStep(2)">Próximo →</button>
-  </div>
+  <div class="btn-row"><button class="btn btn-next" onclick="goStep(2)">Próximo →</button></div>
 </div>
 
-<!-- ======================== STEP 2: SEGMENTAÇÃO ======================== -->
+<!-- ===== STEP 2 ===== -->
 <div class="card hidden" id="step2">
   <span class="card-icon">🔍</span>
   <h2>Qual seguro deseja cotar?</h2>
   <p class="subtitle">Selecione o tipo de seguro e vamos personalizar o formulário para você.</p>
   <div class="seguro-grid">
-    <div class="seguro-option" onclick="selectSeguro('auto', this)">
-      <span class="seg-icon">🚗</span>
-      <div class="seg-info">
-        <h3>Automóvel</h3>
-        <p>Carro, moto ou caminhão</p>
-      </div>
-      <div class="seg-check">✓</div>
+    <div class="seguro-option" onclick="selectSeguro('auto',this)">
+      <span class="seg-icon">🚗</span><div class="seg-info"><h3>Automóvel</h3><p>Carro, moto ou caminhão</p></div><div class="seg-check">✓</div>
     </div>
-    <div class="seguro-option" onclick="selectSeguro('empresarial', this)">
-      <span class="seg-icon">🏢</span>
-      <div class="seg-info">
-        <h3>Empresarial</h3>
-        <p>Comércio, indústria, escritório</p>
-      </div>
-      <div class="seg-check">✓</div>
+    <div class="seguro-option" onclick="selectSeguro('empresarial',this)">
+      <span class="seg-icon">🏢</span><div class="seg-info"><h3>Empresarial</h3><p>Comércio, indústria, escritório</p></div><div class="seg-check">✓</div>
     </div>
-    <div class="seguro-option" onclick="selectSeguro('vida', this)">
-      <span class="seg-icon">❤️</span>
-      <div class="seg-info">
-        <h3>Vida</h3>
-        <p>Proteção pessoal e familiar</p>
-      </div>
-      <div class="seg-check">✓</div>
+    <div class="seguro-option" onclick="selectSeguro('vida',this)">
+      <span class="seg-icon">❤️</span><div class="seg-info"><h3>Vida</h3><p>Proteção pessoal e familiar</p></div><div class="seg-check">✓</div>
     </div>
-    <div class="seguro-option" onclick="selectSeguro('residencial', this)">
-      <span class="seg-icon">🏠</span>
-      <div class="seg-info">
-        <h3>Residencial</h3>
-        <p>Casa ou apartamento</p>
-      </div>
-      <div class="seg-check">✓</div>
+    <div class="seguro-option" onclick="selectSeguro('residencial',this)">
+      <span class="seg-icon">🏠</span><div class="seg-info"><h3>Residencial</h3><p>Casa ou apartamento</p></div><div class="seg-check">✓</div>
+    </div>
+    <div class="seguro-option" style="grid-column:span 2" onclick="selectSeguro('outros',this)">
+      <span class="seg-icon">📋</span><div class="seg-info"><h3>Outros</h3><p>Saúde, Viagem, Responsabilidade Civil e mais</p></div><div class="seg-check">✓</div>
     </div>
   </div>
-  <span class="field-error hidden" id="err-seguro" style="margin-top:8px;display:block;">Selecione um tipo de seguro.</span>
+  <span class="field-error hidden" id="err-seguro" style="margin-top:8px;display:block">Selecione um tipo de seguro.</span>
   <div class="btn-row">
     <button class="btn btn-back" onclick="goStep(1)">← Voltar</button>
     <button class="btn btn-next" onclick="goStep(3)">Próximo →</button>
   </div>
 </div>
 
-<!-- ======================== STEP 3: APÓLICE ATUAL ======================== -->
+<!-- ===== STEP 3 ===== -->
 <div class="card hidden" id="step3">
-  <span class="card-icon">📄</span>
-  <h2>Você já possui esse seguro?</h2>
-  <p class="subtitle">Se já tiver uma apólice ativa, podemos usar as informações para uma cotação mais precisa e aproveitar seu bônus.</p>
+  <span class="card-icon" id="step3-icon">📄</span>
+  <h2 id="step3-title">Você já possui esse seguro?</h2>
+  <p class="subtitle" id="step3-sub">Se já tiver uma apólice ativa, podemos usar as informações para uma cotação mais precisa.</p>
+
+  <!-- Sub-seleção OUTROS -->
+  <div class="hidden" id="outrosSubtipoSection">
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Selecione o seguro desejado:</p>
+    <div class="outros-subtipo">
+      <div class="subtipo-pill" onclick="selectSubtipo('Saúde',this)">🏥 Saúde</div>
+      <div class="subtipo-pill" onclick="selectSubtipo('Viagem',this)">✈️ Viagem</div>
+      <div class="subtipo-pill" onclick="selectSubtipo('Responsabilidade Civil',this)">⚖️ Responsabilidade Civil</div>
+      <div class="subtipo-pill" onclick="selectSubtipo('Transportes e Logística',this)">🚛 Transportes e Logística</div>
+      <div class="subtipo-pill" onclick="selectSubtipo('Crédito e Fiança',this)">💳 Crédito e Fiança</div>
+    </div>
+    <span class="field-error hidden" id="err-subtipo" style="margin-top:8px;display:block">Selecione um tipo de seguro.</span>
+    <div style="margin:24px 0 16px;border-top:1px solid var(--border);padding-top:20px;">
+      <p style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px;">Você já possui esse seguro hoje?</p>
+    </div>
+  </div>
+
+  <!-- Sim / Não -->
   <div class="yn-group">
     <button class="yn-btn" id="btn-sim" onclick="selectApolice('sim')">✅ Sim, já tenho</button>
     <button class="yn-btn" id="btn-nao" onclick="selectApolice('nao')">❌ Não, é novo</button>
   </div>
-  <span class="field-error hidden" id="err-apolice" style="margin-top:12px;display:block;">Por favor, selecione uma opção.</span>
+  <span class="field-error hidden" id="err-apolice" style="margin-top:12px;display:block">Por favor, selecione uma opção.</span>
 
-  <!-- Campos que aparecem se SIM -->
+  <!-- Campos se SIM -->
   <div class="hidden" id="apoliceFields" style="margin-top:20px;">
     <div class="apolice-section">
       <div class="apolice-header">📋 Dados da apólice atual</div>
@@ -637,22 +226,21 @@
         <div class="field-row">
           <div class="field">
             <label>Nº da apólice <span class="opt">(opcional)</span></label>
-            <input type="text" id="numApolice" placeholder="Ex: 12345678" />
+            <input type="text" id="numApolice" placeholder="Ex: 12345678"/>
           </div>
           <div class="field">
             <label>Bônus / Classe <span class="opt">(opcional)</span></label>
-            <input type="text" id="bonus" placeholder="Ex: Bônus 33 / Classe 10" />
+            <input type="text" id="bonus" placeholder="Ex: Bônus 33 / Classe 10"/>
           </div>
         </div>
         <div class="field">
-          <label>PDF da apólice atual <span class="req">*</span></label>
+          <label>PDF da apólice atual <span class="opt">(opcional)</span></label>
           <div class="file-upload" id="fileDropzone" onclick="document.getElementById('pdfApolice').click()">
-            <input type="file" id="pdfApolice" accept=".pdf" onchange="handleFile(this)" />
+            <input type="file" id="pdfApolice" accept=".pdf" onchange="handleFile(this)"/>
             <div class="file-upload-icon">📎</div>
             <div class="file-upload-text">Clique para anexar ou arraste aqui<br><strong>Apenas PDF</strong></div>
             <div class="file-name hidden" id="fileName"></div>
           </div>
-          <span class="field-error hidden" id="err-pdf">O PDF da apólice é obrigatório.</span>
         </div>
       </div>
     </div>
@@ -664,168 +252,71 @@
   </div>
 </div>
 
-<!-- ======================== STEP 4: DADOS ESPECÍFICOS ======================== -->
+<!-- ===== STEP 4 ===== -->
 <div class="card hidden" id="step4">
 
   <!-- AUTO -->
   <div id="dados-auto" class="hidden">
-    <span class="card-icon">🚗</span>
-    <h2>Dados do Veículo</h2>
+    <span class="card-icon">🚗</span><h2>Dados do Veículo</h2>
     <p class="subtitle">Informe os dados do veículo a ser segurado.</p>
     <div class="field-group">
       <div class="field-row">
-        <div class="field">
-          <label>Placa <span class="req">*</span></label>
-          <input type="text" id="placa" placeholder="ABC-1234" oninput="this.value=this.value.toUpperCase()" />
-        </div>
-        <div class="field">
-          <label>CEP de pernoite <span class="req">*</span></label>
-          <input type="text" id="cepVeiculo" placeholder="00000-000" />
-        </div>
+        <div class="field"><label>Placa <span class="req">*</span></label><input type="text" id="placa" placeholder="ABC-1234" oninput="this.value=this.value.toUpperCase()"/></div>
+        <div class="field"><label>CEP de pernoite <span class="req">*</span></label><input type="text" id="cepVeiculo" placeholder="00000-000"/></div>
       </div>
       <div class="field-row">
-        <div class="field">
-          <label>Marca / Modelo <span class="req">*</span></label>
-          <input type="text" id="modelo" placeholder="Ex: Toyota Corolla" />
-        </div>
-        <div class="field">
-          <label>Ano fabricação / modelo <span class="req">*</span></label>
-          <input type="text" id="anoVeiculo" placeholder="Ex: 2021/2022" />
-        </div>
+        <div class="field"><label>Marca / Modelo <span class="req">*</span></label><input type="text" id="modelo" placeholder="Ex: Toyota Corolla"/></div>
+        <div class="field"><label>Ano fab. / modelo <span class="req">*</span></label><input type="text" id="anoVeiculo" placeholder="Ex: 2021/2022"/></div>
       </div>
       <div class="field-row">
-        <div class="field">
-          <label>Uso do veículo <span class="req">*</span></label>
-          <select id="usoVeiculo">
-            <option value="">Selecione...</option>
-            <option>Lazer / passeio</option>
-            <option>Trabalho / comercial</option>
-            <option>Lazer e trabalho</option>
-            <option>Transporte por app (Uber, etc.)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Possui garagem? <span class="req">*</span></label>
-          <select id="garagem">
-            <option value="">Selecione...</option>
-            <option>Sim, em casa</option>
-            <option>Sim, no trabalho</option>
-            <option>Sim, nos dois</option>
-            <option>Não possui garagem</option>
-          </select>
-        </div>
+        <div class="field"><label>Uso do veículo <span class="req">*</span></label>
+          <select id="usoVeiculo"><option value="">Selecione...</option><option>Lazer / passeio</option><option>Trabalho / comercial</option><option>Lazer e trabalho</option><option>Transporte por app</option></select></div>
+        <div class="field"><label>Possui garagem? <span class="req">*</span></label>
+          <select id="garagem"><option value="">Selecione...</option><option>Sim, em casa</option><option>Sim, no trabalho</option><option>Sim, nos dois</option><option>Não possui garagem</option></select></div>
       </div>
-
       <div class="section-divider"><hr><span>Condutor principal</span><hr></div>
-
       <div class="field-row">
-        <div class="field">
-          <label>CPF do condutor <span class="req">*</span></label>
-          <input type="text" id="cpfCondutor" placeholder="000.000.000-00" />
-        </div>
-        <div class="field">
-          <label>Data de nascimento <span class="req">*</span></label>
-          <input type="date" id="nascCondutor" />
-        </div>
+        <div class="field"><label>CPF do condutor <span class="req">*</span></label><input type="text" id="cpfCondutor" placeholder="000.000.000-00"/></div>
+        <div class="field"><label>Data de nascimento <span class="req">*</span></label><input type="date" id="nascCondutor"/></div>
       </div>
-      <div class="field">
-        <label>Há condutor com menos de 26 anos? <span class="req">*</span></label>
-        <select id="condutor26">
-          <option value="">Selecione...</option>
-          <option>Não</option>
-          <option>Sim — mora na mesma residência</option>
-          <option>Sim — não mora na mesma residência</option>
-        </select>
-      </div>
-
+      <div class="field"><label>Condutor com menos de 26 anos? <span class="req">*</span></label>
+        <select id="condutor26"><option value="">Selecione...</option><option>Não</option><option>Sim — mora na mesma residência</option><option>Sim — não mora na mesma residência</option></select></div>
       <div class="section-divider"><hr><span>Opcionais</span><hr></div>
-
       <div class="field-row">
-        <div class="field">
-          <label>Rastreador instalado? <span class="opt">(opcional)</span></label>
-          <select id="rastreador">
-            <option value="">Selecione...</option>
-            <option>Sim</option>
-            <option>Não</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Franquia preferida <span class="opt">(opcional)</span></label>
-          <select id="franquia">
-            <option value="">Selecione...</option>
-            <option>Normal</option>
-            <option>Reduzida</option>
-            <option>Sem preferência</option>
-          </select>
-        </div>
+        <div class="field"><label>Rastreador <span class="opt">(opcional)</span></label>
+          <select id="rastreador"><option value="">Selecione...</option><option>Sim</option><option>Não</option></select></div>
+        <div class="field"><label>Franquia preferida <span class="opt">(opcional)</span></label>
+          <select id="franquia"><option value="">Selecione...</option><option>Normal</option><option>Reduzida</option><option>Sem preferência</option></select></div>
       </div>
     </div>
   </div>
 
   <!-- EMPRESARIAL -->
   <div id="dados-empresarial" class="hidden">
-    <span class="card-icon">🏢</span>
-    <h2>Dados da Empresa</h2>
+    <span class="card-icon">🏢</span><h2>Dados da Empresa</h2>
     <p class="subtitle">Informações sobre o estabelecimento a ser segurado.</p>
     <div class="field-group">
       <div class="field-row">
-        <div class="field">
-          <label>CNPJ <span class="req">*</span></label>
-          <input type="text" id="cnpj" placeholder="00.000.000/0000-00" />
-        </div>
-        <div class="field">
-          <label>CEP do estabelecimento <span class="req">*</span></label>
-          <input type="text" id="cepEmpresa" placeholder="00000-000" />
-        </div>
+        <div class="field"><label>CNPJ <span class="req">*</span></label><input type="text" id="cnpj" placeholder="00.000.000/0000-00"/></div>
+        <div class="field"><label>CEP do estabelecimento <span class="req">*</span></label><input type="text" id="cepEmpresa" placeholder="00000-000"/></div>
       </div>
-      <div class="field">
-        <label>Razão social <span class="req">*</span></label>
-        <input type="text" id="razaoSocial" placeholder="Nome oficial da empresa" />
+      <div class="field"><label>Razão social <span class="req">*</span></label><input type="text" id="razaoSocial" placeholder="Nome oficial da empresa"/></div>
+      <div class="field-row">
+        <div class="field"><label>Ramo / atividade <span class="req">*</span></label><input type="text" id="ramo" placeholder="Ex: Restaurante, Loja..."/></div>
+        <div class="field"><label>Tipo de imóvel <span class="req">*</span></label>
+          <select id="tipoImovelEmp"><option value="">Selecione...</option><option>Próprio</option><option>Alugado</option></select></div>
       </div>
       <div class="field-row">
-        <div class="field">
-          <label>Ramo / atividade <span class="req">*</span></label>
-          <input type="text" id="ramo" placeholder="Ex: Restaurante, Loja de roupas..." />
-        </div>
-        <div class="field">
-          <label>Tipo de imóvel <span class="req">*</span></label>
-          <select id="tipoImovelEmp">
-            <option value="">Selecione...</option>
-            <option>Próprio</option>
-            <option>Alugado</option>
-          </select>
-        </div>
+        <div class="field"><label>Área construída (m²) <span class="req">*</span></label><input type="number" id="areaEmp" placeholder="Ex: 150"/></div>
+        <div class="field"><label>Nº de funcionários <span class="opt">(opcional)</span></label><input type="number" id="funcEmp" placeholder="Ex: 10"/></div>
       </div>
       <div class="field-row">
-        <div class="field">
-          <label>Área construída (m²) <span class="req">*</span></label>
-          <input type="number" id="areaEmp" placeholder="Ex: 150" />
-        </div>
-        <div class="field">
-          <label>Nº de funcionários <span class="opt">(opcional)</span></label>
-          <input type="number" id="funcEmp" placeholder="Ex: 10" />
-        </div>
+        <div class="field"><label>Valor imóvel/benfeitorias (R$) <span class="req">*</span></label><input type="text" id="valorImovelEmp" placeholder="Ex: 500.000"/></div>
+        <div class="field"><label>Valor do estoque (R$) <span class="req">*</span></label><input type="text" id="valorEstoque" placeholder="Ex: 200.000"/></div>
       </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Valor do imóvel/benfeitorias (R$) <span class="req">*</span></label>
-          <input type="text" id="valorImovelEmp" placeholder="Ex: 500.000" />
-        </div>
-        <div class="field">
-          <label>Valor do estoque (R$) <span class="req">*</span></label>
-          <input type="text" id="valorEstoque" placeholder="Ex: 200.000" />
-        </div>
-      </div>
-      <div class="field">
-        <label>Valor dos equipamentos (R$) <span class="req">*</span></label>
-        <input type="text" id="valorEquip" placeholder="Ex: 80.000" />
-      </div>
-      <div class="field">
-        <label>Faturamento anual (R$) <span class="req">*</span></label>
-        <input type="text" id="faturamento" placeholder="Ex: 1.200.000" />
-      </div>
-      <div class="field">
-        <label>Coberturas desejadas <span class="req">*</span></label>
+      <div class="field"><label>Valor dos equipamentos (R$) <span class="req">*</span></label><input type="text" id="valorEquip" placeholder="Ex: 80.000"/></div>
+      <div class="field"><label>Faturamento anual (R$) <span class="req">*</span></label><input type="text" id="faturamento" placeholder="Ex: 1.200.000"/></div>
+      <div class="field"><label>Coberturas desejadas <span class="req">*</span></label>
         <div class="check-grid" id="coberturasEmp">
           <div class="check-pill" onclick="togglePill(this)">🔥 Incêndio</div>
           <div class="check-pill" onclick="togglePill(this)">🔓 Roubo/Furto</div>
@@ -842,168 +333,71 @@
 
   <!-- VIDA -->
   <div id="dados-vida" class="hidden">
-    <span class="card-icon">❤️</span>
-    <h2>Dados para Seguro de Vida</h2>
+    <span class="card-icon">❤️</span><h2>Dados para Seguro de Vida</h2>
     <p class="subtitle">Informações do segurado para elaboração da proposta.</p>
     <div class="field-group">
       <div class="field-row">
-        <div class="field">
-          <label>CPF do segurado <span class="req">*</span></label>
-          <input type="text" id="cpfVida" placeholder="000.000.000-00" />
-        </div>
-        <div class="field">
-          <label>Data de nascimento <span class="req">*</span></label>
-          <input type="date" id="nascVida" />
-        </div>
+        <div class="field"><label>CPF do segurado <span class="req">*</span></label><input type="text" id="cpfVida" placeholder="000.000.000-00"/></div>
+        <div class="field"><label>Data de nascimento <span class="req">*</span></label><input type="date" id="nascVida"/></div>
       </div>
       <div class="field-row">
-        <div class="field">
-          <label>Sexo biológico <span class="req">*</span></label>
-          <select id="sexo">
-            <option value="">Selecione...</option>
-            <option>Masculino</option>
-            <option>Feminino</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Profissão <span class="req">*</span></label>
-          <input type="text" id="profissao" placeholder="Ex: Engenheiro, Professor..." />
-        </div>
+        <div class="field"><label>Sexo biológico <span class="req">*</span></label>
+          <select id="sexo"><option value="">Selecione...</option><option>Masculino</option><option>Feminino</option></select></div>
+        <div class="field"><label>Profissão <span class="req">*</span></label><input type="text" id="profissao" placeholder="Ex: Engenheiro..."/></div>
       </div>
       <div class="field-row">
-        <div class="field">
-          <label>É fumante? <span class="req">*</span></label>
-          <select id="fumante">
-            <option value="">Selecione...</option>
-            <option>Não</option>
-            <option>Sim</option>
-            <option>Ex-fumante</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Pratica esporte de risco? <span class="req">*</span></label>
-          <select id="esporte">
-            <option value="">Selecione...</option>
-            <option>Não</option>
-            <option>Sim (qual?)</option>
-          </select>
-        </div>
+        <div class="field"><label>É fumante? <span class="req">*</span></label>
+          <select id="fumante"><option value="">Selecione...</option><option>Não</option><option>Sim</option><option>Ex-fumante</option></select></div>
+        <div class="field"><label>Esporte de risco? <span class="req">*</span></label>
+          <select id="esporte"><option value="">Selecione...</option><option>Não</option><option>Sim</option></select></div>
       </div>
-      <div class="field">
-        <label>Possui doenças/condições pré-existentes? <span class="req">*</span></label>
-        <select id="doencas">
-          <option value="">Selecione...</option>
-          <option>Não</option>
-          <option>Sim — diabetes</option>
-          <option>Sim — hipertensão</option>
-          <option>Sim — doença cardíaca</option>
-          <option>Sim — outra condição</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Capital segurado desejado (R$) <span class="req">*</span></label>
-        <select id="capitalVida">
-          <option value="">Selecione...</option>
-          <option>Até R$ 100.000</option>
-          <option>R$ 100.000 a R$ 300.000</option>
-          <option>R$ 300.000 a R$ 500.000</option>
-          <option>R$ 500.000 a R$ 1.000.000</option>
-          <option>Acima de R$ 1.000.000</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Coberturas desejadas <span class="req">*</span></label>
+      <div class="field"><label>Pré-existências <span class="req">*</span></label>
+        <select id="doencas"><option value="">Selecione...</option><option>Não</option><option>Sim — diabetes</option><option>Sim — hipertensão</option><option>Sim — doença cardíaca</option><option>Sim — outra condição</option></select></div>
+      <div class="field"><label>Capital segurado desejado <span class="req">*</span></label>
+        <select id="capitalVida"><option value="">Selecione...</option><option>Até R$ 100.000</option><option>R$ 100.000 a R$ 300.000</option><option>R$ 300.000 a R$ 500.000</option><option>R$ 500.000 a R$ 1.000.000</option><option>Acima de R$ 1.000.000</option></select></div>
+      <div class="field"><label>Coberturas desejadas <span class="req">*</span></label>
         <div class="check-grid" id="coberturasVida">
           <div class="check-pill" onclick="togglePill(this)">💀 Morte (qualquer causa)</div>
           <div class="check-pill" onclick="togglePill(this)">🦽 Invalidez Permanente</div>
-          <div class="check-pill" onclick="togglePill(this)">🏥 Diária por Internação (DIT)</div>
+          <div class="check-pill" onclick="togglePill(this)">🏥 Diária por Internação</div>
           <div class="check-pill" onclick="togglePill(this)">🩺 Doenças Graves</div>
           <div class="check-pill" onclick="togglePill(this)">🦷 Assistência Funeral</div>
           <div class="check-pill" onclick="togglePill(this)">👶 Rendimento por Afastamento</div>
         </div>
       </div>
-      <div class="field">
-        <label>Beneficiário(s) <span class="opt">(opcional — nome e parentesco)</span></label>
-        <textarea id="beneficiarios" placeholder="Ex: João Silva — Filho&#10;Maria Souza — Cônjuge"></textarea>
-      </div>
+      <div class="field"><label>Beneficiário(s) <span class="opt">(opcional)</span></label>
+        <textarea id="beneficiarios" placeholder="Ex: João Silva — Filho&#10;Maria Souza — Cônjuge"></textarea></div>
     </div>
   </div>
 
   <!-- RESIDENCIAL -->
   <div id="dados-residencial" class="hidden">
-    <span class="card-icon">🏠</span>
-    <h2>Dados do Imóvel</h2>
+    <span class="card-icon">🏠</span><h2>Dados do Imóvel</h2>
     <p class="subtitle">Informações sobre a residência a ser segurada.</p>
     <div class="field-group">
       <div class="field-row">
-        <div class="field">
-          <label>CEP do imóvel <span class="req">*</span></label>
-          <input type="text" id="cepRes" placeholder="00000-000" />
-        </div>
-        <div class="field">
-          <label>Tipo de imóvel <span class="req">*</span></label>
-          <select id="tipoImovelRes">
-            <option value="">Selecione...</option>
-            <option>Casa</option>
-            <option>Apartamento</option>
-            <option>Sobrado</option>
-            <option>Cobertura</option>
-          </select>
-        </div>
+        <div class="field"><label>CEP do imóvel <span class="req">*</span></label><input type="text" id="cepRes" placeholder="00000-000"/></div>
+        <div class="field"><label>Tipo de imóvel <span class="req">*</span></label>
+          <select id="tipoImovelRes"><option value="">Selecione...</option><option>Casa</option><option>Apartamento</option><option>Sobrado</option><option>Cobertura</option></select></div>
       </div>
       <div class="field-row">
-        <div class="field">
-          <label>Ocupação <span class="req">*</span></label>
-          <select id="ocupacao">
-            <option value="">Selecione...</option>
-            <option>Próprio — ocupado pelo dono</option>
-            <option>Próprio — alugado a terceiros</option>
-            <option>Alugado — sou o inquilino</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Uso <span class="req">*</span></label>
-          <select id="usoRes">
-            <option value="">Selecione...</option>
-            <option>Residência habitual</option>
-            <option>Veraneio / temporada</option>
-          </select>
-        </div>
+        <div class="field"><label>Ocupação <span class="req">*</span></label>
+          <select id="ocupacao"><option value="">Selecione...</option><option>Próprio — ocupado pelo dono</option><option>Próprio — alugado a terceiros</option><option>Alugado — sou o inquilino</option></select></div>
+        <div class="field"><label>Uso <span class="req">*</span></label>
+          <select id="usoRes"><option value="">Selecione...</option><option>Residência habitual</option><option>Veraneio / temporada</option></select></div>
       </div>
       <div class="field-row">
-        <div class="field">
-          <label>Área construída (m²) <span class="req">*</span></label>
-          <input type="number" id="areaRes" placeholder="Ex: 80" />
-        </div>
-        <div class="field">
-          <label>Valor do imóvel (R$) <span class="req">*</span></label>
-          <input type="text" id="valorImovelRes" placeholder="Ex: 400.000" />
-        </div>
+        <div class="field"><label>Área construída (m²) <span class="req">*</span></label><input type="number" id="areaRes" placeholder="Ex: 80"/></div>
+        <div class="field"><label>Valor do imóvel (R$) <span class="req">*</span></label><input type="text" id="valorImovelRes" placeholder="Ex: 400.000"/></div>
       </div>
-      <div class="field">
-        <label>Valor dos bens / mobília (R$) <span class="req">*</span></label>
-        <input type="text" id="valorBens" placeholder="Ex: 50.000" />
-      </div>
+      <div class="field"><label>Valor dos bens / mobília (R$) <span class="req">*</span></label><input type="text" id="valorBens" placeholder="Ex: 50.000"/></div>
       <div class="field-row">
-        <div class="field">
-          <label>Condomínio / portaria 24h? <span class="opt">(opcional)</span></label>
-          <select id="condominio">
-            <option value="">Selecione...</option>
-            <option>Sim</option>
-            <option>Não</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Alarme / câmeras? <span class="opt">(opcional)</span></label>
-          <select id="alarme">
-            <option value="">Selecione...</option>
-            <option>Sim</option>
-            <option>Não</option>
-          </select>
-        </div>
+        <div class="field"><label>Condomínio / portaria 24h? <span class="opt">(opcional)</span></label>
+          <select id="condominio"><option value="">Selecione...</option><option>Sim</option><option>Não</option></select></div>
+        <div class="field"><label>Alarme / câmeras? <span class="opt">(opcional)</span></label>
+          <select id="alarme"><option value="">Selecione...</option><option>Sim</option><option>Não</option></select></div>
       </div>
-      <div class="field">
-        <label>Coberturas desejadas <span class="req">*</span></label>
+      <div class="field"><label>Coberturas desejadas <span class="req">*</span></label>
         <div class="check-grid" id="coberturasRes">
           <div class="check-pill" onclick="togglePill(this)">🔥 Incêndio</div>
           <div class="check-pill" onclick="togglePill(this)">🔓 Roubo/Furto</div>
@@ -1018,9 +412,27 @@
     </div>
   </div>
 
-  <!-- OBSERVAÇÕES (todos os seguros) -->
+  <!-- OUTROS -->
+  <div id="dados-outros" class="hidden">
+    <span class="card-icon">📋</span><h2>Dados Principais</h2>
+    <p class="subtitle">Informe os dados abaixo para que possamos elaborar sua cotação de <strong id="outrosNome" style="color:var(--gold-light)"></strong>.</p>
+    <div class="field-group">
+      <div class="field-row">
+        <div class="field"><label>CPF ou CNPJ <span class="req">*</span></label><input type="text" id="cpfOutros" placeholder="000.000.000-00"/></div>
+        <div class="field"><label>Data de nascimento <span class="opt">(opcional)</span></label><input type="date" id="nascOutros"/></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Profissão / Atividade <span class="opt">(opcional)</span></label><input type="text" id="profOutros" placeholder="Ex: Médico, Transportadora..."/></div>
+        <div class="field"><label>CEP <span class="opt">(opcional)</span></label><input type="text" id="cepOutros" placeholder="00000-000"/></div>
+      </div>
+      <div class="field"><label>Observações / Detalhes do seguro <span class="opt">(opcional)</span></label>
+        <textarea id="obsOutros" placeholder="Descreva o que precisa cobrir, valores estimados, situação atual..." style="min-height:100px;"></textarea></div>
+    </div>
+  </div>
+
+  <!-- OBS geral -->
   <div style="margin-top:24px;">
-    <div class="section-divider"><hr><span>Observações</span><hr></div>
+    <div class="section-divider"><hr><span>Observações gerais</span><hr></div>
     <div class="field">
       <label>Alguma informação adicional? <span class="opt">(opcional)</span></label>
       <textarea id="obs" placeholder="Dúvidas, preferências, situações específicas..." style="min-height:70px;"></textarea>
@@ -1033,14 +445,13 @@
   </div>
 </div>
 
-<!-- ======================== SUCCESS ======================== -->
+<!-- ===== SUCCESS ===== -->
 <div class="card hidden" id="stepSuccess">
   <div class="success-card">
     <div class="success-icon">🎉</div>
     <h2>Solicitação enviada!</h2>
-    <p>Recebemos seus dados com sucesso. Nossa equipe vai analisar as informações e entrar em contato com sua cotação personalizada em breve.<br><br>
-    Se preferir, pode nos chamar diretamente no WhatsApp:</p>
-    <a class="whatsapp-btn" href="https://wa.me/5511999999999?text=Olá! Acabei de preencher o formulário de cotação." target="_blank">
+    <p>Recebemos seus dados com sucesso. Nossa equipe vai analisar as informações e entrar em contato com sua cotação personalizada em breve.<br><br>Se preferir, pode nos chamar diretamente no WhatsApp:</p>
+    <a class="whatsapp-btn" href="https://wa.me/5511993774664?text=Olá,%20quero%20falar%20com%20um%20especialista&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPMTI0MDI0NTc0Mjg3NDE0AAGnni1Dgi-vnJlNOIlQO1lK2hRaoLb21yuGp6RKpP47H3NCpuUkBhrUC9x8ih8_aem_afLubevyI3nDuPSBhKCEjg" target="_blank">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       Falar no WhatsApp
     </a>
@@ -1048,177 +459,208 @@
 </div>
 
 <div class="footer">Formulário criado para <span>Corretora de Seguros</span> · Seus dados estão protegidos 🔒</div>
+<div class="save-indicator" id="saveIndicator">✅ Progresso salvo</div>
 
 <script>
-  // STATE
-  let state = {
-    step: 1,
-    seguro: null,
-    temApolice: null,
-    pdfFile: null
-  };
+  let state = { step:1, seguro:null, seguroSubtipo:null, temApolice:null, pdfFile:null, pdfFileName:'' };
 
-  // NAVIGATION
   function goStep(n) {
-    if (n === 2 && !validateStep1()) return;
-    if (n === 3 && !validateStep2()) return;
-    if (n === 4 && !validateStep3()) return;
-    if (n > 4) return;
-
-    // Se volta do passo 4 para passo 3
-    if (n === 3 && state.step === 4) {
-      showStep(3);
-      return;
-    }
-
+    if (n===2 && !validateStep1()) return;
+    if (n===3 && !validateStep2()) return;
+    if (n===4 && !validateStep3()) return;
     showStep(n);
+    autoSave();
   }
 
   function showStep(n) {
-    for (let i = 1; i <= 4; i++) {
-      const el = document.getElementById('step' + i);
-      if (el) el.classList.add('hidden');
-    }
-    const target = document.getElementById('step' + n);
-    if (target) {
-      target.classList.remove('hidden');
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    [1,2,3,4].forEach(i => { const el=document.getElementById('step'+i); if(el) el.classList.add('hidden'); });
+    const t = document.getElementById('step'+n);
+    if (t) { t.classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); }
     state.step = n;
     updateProgress(n);
-
-    // Mostra dados específicos do seguro no passo 4
-    if (n === 4) showDadosSeguro();
+    if (n===3) configureStep3();
+    if (n===4) showDadosSeguro();
   }
 
   function updateProgress(n) {
-    for (let i = 1; i <= 4; i++) {
-      const dot = document.getElementById('pd' + i);
-      const step = document.getElementById('ps' + i);
-      const line = document.getElementById('pl' + i);
-      dot.classList.remove('active', 'done');
-      step.classList.remove('active', 'done');
-      if (line) line.classList.remove('done');
+    for (let i=1;i<=4;i++) {
+      const dot=document.getElementById('pd'+i), st=document.getElementById('ps'+i), ln=document.getElementById('pl'+i);
+      dot.classList.remove('active','done'); st.classList.remove('active','done'); if(ln) ln.classList.remove('done');
+      if (i<n) { dot.classList.add('done'); dot.innerHTML='✓'; st.classList.add('done'); if(ln) ln.classList.add('done'); }
+      else if (i===n) { dot.classList.add('active'); dot.innerHTML=i; st.classList.add('active'); }
+      else { dot.innerHTML=i; }
+    }
+  }
 
-      if (i < n) {
-        dot.classList.add('done');
-        dot.innerHTML = '✓';
-        step.classList.add('done');
-        if (line) line.classList.add('done');
-      } else if (i === n) {
-        dot.classList.add('active');
-        dot.innerHTML = i;
-        step.classList.add('active');
-      } else {
-        dot.innerHTML = i;
+  function configureStep3() {
+    const isOutros = state.seguro==='outros';
+    document.getElementById('outrosSubtipoSection').classList[isOutros?'remove':'add']('hidden');
+    document.getElementById('step3-icon').textContent = isOutros ? '🔎' : '📄';
+    document.getElementById('step3-title').textContent = isOutros ? 'Qual seria o seguro que deseja cotar?' : 'Você já possui esse seguro?';
+    document.getElementById('step3-sub').textContent = isOutros
+      ? 'Selecione a categoria e informe se já possui esse seguro atualmente.'
+      : 'Se já tiver uma apólice ativa, podemos usar as informações para uma cotação mais precisa.';
+    // reset sim/nao buttons
+    document.getElementById('btn-sim').className='yn-btn';
+    document.getElementById('btn-nao').className='yn-btn';
+    document.getElementById('apoliceFields').classList.add('hidden');
+    state.temApolice = null;
+  }
+
+  function selectSeguro(tipo, el) {
+    document.querySelectorAll('.seguro-option').forEach(o=>o.classList.remove('selected'));
+    el.classList.add('selected');
+    state.seguro = tipo; state.seguroSubtipo = null;
+    document.getElementById('err-seguro').classList.add('hidden');
+  }
+
+  function selectSubtipo(nome, el) {
+    document.querySelectorAll('.subtipo-pill').forEach(p=>p.classList.remove('selected'));
+    el.classList.add('selected');
+    state.seguroSubtipo = nome;
+    document.getElementById('err-subtipo').classList.add('hidden');
+  }
+
+  function selectApolice(val) {
+    state.temApolice = val;
+    document.getElementById('btn-sim').className='yn-btn'+(val==='sim'?' selected-yes':'');
+    document.getElementById('btn-nao').className='yn-btn'+(val==='nao'?' selected-no':'');
+    document.getElementById('err-apolice').classList.add('hidden');
+    document.getElementById('apoliceFields').classList[val==='sim'?'remove':'add']('hidden');
+  }
+
+  function handleFile(input) {
+    if (input.files && input.files[0]) {
+      const f = input.files[0]; state.pdfFile=f; state.pdfFileName=f.name;
+      const nm=document.getElementById('fileName'); nm.textContent='✅ '+f.name; nm.classList.remove('hidden');
+      document.getElementById('fileDropzone').classList.add('has-file');
+    }
+  }
+
+  function togglePill(el) { el.classList.toggle('checked'); }
+  function getPills(id) { return Array.from(document.querySelectorAll('#'+id+' .check-pill.checked')).map(p=>p.textContent.trim()).join(', '); }
+
+  function showDadosSeguro() {
+    ['auto','empresarial','vida','residencial','outros'].forEach(s=>document.getElementById('dados-'+s).classList.add('hidden'));
+    if (state.seguro) {
+      document.getElementById('dados-'+state.seguro).classList.remove('hidden');
+      if (state.seguro==='outros' && state.seguroSubtipo) {
+        const el=document.getElementById('outrosNome'); if(el) el.textContent=state.seguroSubtipo;
       }
     }
   }
 
-  // SEGURO SELECTION
-  function selectSeguro(tipo, el) {
-    document.querySelectorAll('.seguro-option').forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
-    state.seguro = tipo;
-    document.getElementById('err-seguro').classList.add('hidden');
-  }
-
-  // APÓLICE SELECTION
-  function selectApolice(val) {
-    state.temApolice = val;
-    document.getElementById('btn-sim').className = 'yn-btn' + (val === 'sim' ? ' selected-yes' : '');
-    document.getElementById('btn-nao').className = 'yn-btn' + (val === 'nao' ? ' selected-no' : '');
-    document.getElementById('err-apolice').classList.add('hidden');
-
-    const fields = document.getElementById('apoliceFields');
-    if (val === 'sim') {
-      fields.classList.remove('hidden');
-    } else {
-      fields.classList.add('hidden');
-    }
-  }
-
-  // FILE UPLOAD
-  function handleFile(input) {
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      state.pdfFile = file;
-      const nameEl = document.getElementById('fileName');
-      nameEl.textContent = '✅ ' + file.name;
-      nameEl.classList.remove('hidden');
-      document.getElementById('fileDropzone').classList.add('has-file');
-      document.getElementById('err-pdf').classList.add('hidden');
-    }
-  }
-
-  // CHECKBOX PILLS
-  function togglePill(el) {
-    el.classList.toggle('checked');
-  }
-
-  // SHOW DADOS STEP 4
-  function showDadosSeguro() {
-    ['auto', 'empresarial', 'vida', 'residencial'].forEach(s => {
-      document.getElementById('dados-' + s).classList.add('hidden');
-    });
-    if (state.seguro) {
-      document.getElementById('dados-' + state.seguro).classList.remove('hidden');
-    }
-  }
-
-  // VALIDATIONS
   function validateStep1() {
-    let ok = true;
-    const nome = document.getElementById('nome').value.trim();
-    const wpp = document.getElementById('whatsapp').value.trim();
-    const email = document.getElementById('email').value.trim();
-
-    if (!nome) { show('err-nome'); err('nome'); ok = false; } else { hide('err-nome'); ok1('nome'); }
-    if (wpp.length < 10) { show('err-wpp'); err('whatsapp'); ok = false; } else { hide('err-wpp'); ok1('whatsapp'); }
-    if (!email.includes('@') || !email.includes('.')) { show('err-email'); err('email'); ok = false; } else { hide('err-email'); ok1('email'); }
+    let ok=true;
+    if (!v('nome')) { show('err-nome'); err('nome'); ok=false; } else { hide('err-nome'); ok1('nome'); }
+    if (v('whatsapp').length<10) { show('err-wpp'); err('whatsapp'); ok=false; } else { hide('err-wpp'); ok1('whatsapp'); }
+    if (!v('email').includes('@')||!v('email').includes('.')) { show('err-email'); err('email'); ok=false; } else { hide('err-email'); ok1('email'); }
     return ok;
   }
-
-  function validateStep2() {
-    if (!state.seguro) { show('err-seguro'); return false; }
-    return true;
-  }
-
+  function validateStep2() { if (!state.seguro) { show('err-seguro'); return false; } return true; }
   function validateStep3() {
+    if (state.seguro==='outros' && !state.seguroSubtipo) { show('err-subtipo'); return false; }
     if (!state.temApolice) { show('err-apolice'); return false; }
-    if (state.temApolice === 'sim' && !state.pdfFile) {
-      show('err-pdf'); return false;
-    }
     return true;
   }
 
-  // SUBMIT
+  function collectData() {
+    const now=new Date(), pad=n=>String(n).padStart(2,'0');
+    return {
+      'Nome': v('nome'), 'WhatsApp': v('whatsapp'), 'E-mail': v('email'),
+      'Tipo de Seguro': state.seguro ? state.seguro.charAt(0).toUpperCase()+state.seguro.slice(1) : '',
+      'Sub-tipo (Outros)': state.seguroSubtipo||'',
+      'Possui Seguro Atual?': state.temApolice==='sim'?'Sim':state.temApolice==='nao'?'Não':'',
+      'Nº Apólice': v('numApolice'), 'Bônus / Classe': v('bonus'),
+      'PDF da Apólice': state.pdfFileName||'',
+      // Auto
+      'Placa': v('placa'), 'Marca / Modelo': v('modelo'), 'Ano Fab./Modelo': v('anoVeiculo'),
+      'CEP Pernoite': v('cepVeiculo'), 'Uso do Veículo': v('usoVeiculo'), 'Garagem?': v('garagem'),
+      'CPF Condutor': v('cpfCondutor'), 'Nasc. Condutor': v('nascCondutor'), 'Condutor <26 anos?': v('condutor26'),
+      'Rastreador': v('rastreador'), 'Franquia': v('franquia'),
+      // Empresarial
+      'CNPJ': v('cnpj'), 'Razão Social': v('razaoSocial'), 'Ramo / Atividade': v('ramo'),
+      'CEP Empresa': v('cepEmpresa'), 'Tipo Imóvel Emp.': v('tipoImovelEmp'),
+      'Área (m²) Emp.': v('areaEmp'), 'Nº Funcionários': v('funcEmp'),
+      'Valor Imóvel Emp. (R$)': v('valorImovelEmp'), 'Valor Estoque (R$)': v('valorEstoque'),
+      'Valor Equipamentos (R$)': v('valorEquip'), 'Faturamento Anual (R$)': v('faturamento'),
+      'Coberturas Emp.': getPills('coberturasEmp'),
+      // Vida
+      'CPF Segurado': v('cpfVida'), 'Nasc. Segurado': v('nascVida'), 'Sexo Biológico': v('sexo'),
+      'Profissão': v('profissao'), 'Fumante?': v('fumante'), 'Esporte de Risco?': v('esporte'),
+      'Pré-existências': v('doencas'), 'Capital Segurado': v('capitalVida'),
+      'Coberturas Vida': getPills('coberturasVida'), 'Beneficiários': v('beneficiarios'),
+      // Residencial
+      'CEP Imóvel': v('cepRes'), 'Tipo Imóvel Res.': v('tipoImovelRes'),
+      'Ocupação': v('ocupacao'), 'Uso (Hab./Veraneio)': v('usoRes'),
+      'Área (m²) Res.': v('areaRes'), 'Valor Imóvel Res. (R$)': v('valorImovelRes'),
+      'Valor Bens (R$)': v('valorBens'), 'Coberturas Res.': getPills('coberturasRes'),
+      'Condomínio/Portaria': v('condominio'), 'Alarme/Câmeras': v('alarme'),
+      // Outros
+      'CPF/CNPJ (Outros)': v('cpfOutros'), 'Data Nasc. (Outros)': v('nascOutros'),
+      'Profissão/Atividade (Outros)': v('profOutros'), 'CEP (Outros)': v('cepOutros'),
+      'Observações Gerais': v('obsOutros')||v('obs'),
+      // Meta
+      'Data Preenchimento': `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`,
+      'Hora Preenchimento': `${pad(now.getHours())}:${pad(now.getMinutes())}`
+    };
+  }
+
+  function downloadExcel() {
+    const data = collectData();
+    const ws = XLSX.utils.json_to_sheet([data]);
+    ws['!cols'] = Object.keys(data).map(k=>({wch:Math.max(k.length,(data[k]||'').length,14)}));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Lead');
+    const now=new Date();
+    XLSX.writeFile(wb, `cotacao_${v('nome').replace(/\s+/g,'_')||'lead'}_${now.getDate()}${now.getMonth()+1}${now.getFullYear()}.xlsx`);
+  }
+
+  function autoSave() {
+    try {
+      localStorage.setItem('cotacao_lead', JSON.stringify(collectData()));
+      const ind=document.getElementById('saveIndicator');
+      ind.classList.add('show'); setTimeout(()=>ind.classList.remove('show'),2000);
+    } catch(e){}
+  }
+
+  document.addEventListener('change', autoSave);
+  document.addEventListener('input', ()=>{ clearTimeout(window._st); window._st=setTimeout(autoSave,800); });
+
+  const SCRIPT_URL = "https://script.google.com/a/macros/ifood.com.br/s/AKfycbxcTwwAsezVtvfLwrQiNvOHcVHY8oE3GdqqhAP7FLrAn-ieX1atiNf_ZTVknkTRhpYr/exec";
+
   function submitForm() {
-    // Aqui você pode integrar com qualquer backend, webhook, Formspree, etc.
-    // Por ora, exibe a tela de sucesso
-    for (let i = 1; i <= 4; i++) {
-      const el = document.getElementById('step' + i);
-      if (el) el.classList.add('hidden');
-    }
+    autoSave();
+    const data = collectData();
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    }).catch(() => {});
+
+    downloadExcel();
+
+    [1,2,3,4].forEach(i=>{ const el=document.getElementById('step'+i); if(el) el.classList.add('hidden'); });
     document.getElementById('progressWrap').classList.add('hidden');
     document.getElementById('stepSuccess').classList.remove('hidden');
-    document.getElementById('stepSuccess').scrollIntoView({ behavior: 'smooth' });
+    window.scrollTo({top:0,behavior:'smooth'});
   }
 
-  // HELPERS
-  function show(id) { document.getElementById(id).classList.remove('hidden'); }
-  function hide(id) { document.getElementById(id).classList.add('hidden'); }
-  function err(id) { document.getElementById(id).classList.add('error'); }
-  function ok1(id) { document.getElementById(id).classList.remove('error'); }
+  function v(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
+  function show(id){ const el=document.getElementById(id); if(el) el.classList.remove('hidden'); }
+  function hide(id){ const el=document.getElementById(id); if(el) el.classList.add('hidden'); }
+  function err(id){ const el=document.getElementById(id); if(el) el.classList.add('error'); }
+  function ok1(id){ const el=document.getElementById(id); if(el) el.classList.remove('error'); }
 
-  // Máscara WhatsApp
-  document.getElementById('whatsapp').addEventListener('input', function() {
-    let v = this.value.replace(/\D/g, '');
-    if (v.length > 11) v = v.slice(0, 11);
-    if (v.length > 6) v = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
-    else if (v.length > 2) v = '(' + v.slice(0,2) + ') ' + v.slice(2);
-    else if (v.length > 0) v = '(' + v;
-    this.value = v;
+  document.getElementById('whatsapp').addEventListener('input',function(){
+    let val=this.value.replace(/\D/g,'');
+    if(val.length>11) val=val.slice(0,11);
+    if(val.length>6) val='('+val.slice(0,2)+') '+val.slice(2,7)+'-'+val.slice(7);
+    else if(val.length>2) val='('+val.slice(0,2)+') '+val.slice(2);
+    else if(val.length>0) val='('+val;
+    this.value=val;
   });
 </script>
 </body>
